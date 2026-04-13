@@ -70,7 +70,14 @@
   <!-- PROFILE VIEW -->
   <div id="profile-view" class="view">
     <div class="view-header">
-      <h3>My Activity</h3>
+      <h3>My Profile & Activity</h3>
+    </div>
+    
+    <div class="card" style="margin-bottom: 2rem;">
+      <h4 style="margin-top: 0; margin-bottom: 1rem;">Profile Information</h4>
+      <p style="margin: 0.5rem 0; color: var(--text-muted);"><strong>Name:</strong> <span id="profile-name" style="color: var(--text-main);"></span></p>
+      <p style="margin: 0.5rem 0; color: var(--text-muted);"><strong>Email:</strong> <span id="profile-email" style="color: var(--text-main);"></span></p>
+      <p style="margin: 0.5rem 0; color: var(--text-muted);"><strong>Role:</strong> <span id="profile-role" style="text-transform: capitalize; color: var(--text-main);"></span></p>
     </div>
     <div class="card">
       <table class="data-table">
@@ -97,8 +104,9 @@
     <div class="staff-grid">
       <div class="card">
         <h4>Add New Book</h4>
-        <input id="add-title" placeholder="Book Title">
-        <input id="add-author" placeholder="Author">
+        <input id="add-title" placeholder="Book Title" required>
+        <input id="add-author" placeholder="Author" required>
+        <input id="add-quantity" type="number" min="1" placeholder="Quantity" value="1" required>
         <button class="primary-btn" onclick="addBook()">Add Book</button>
       </div>
       <div class="card">

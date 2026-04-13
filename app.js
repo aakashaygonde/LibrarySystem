@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
 const bookSchema = new mongoose.Schema({
     title: String,
     author: String,
-    available: { type: Boolean, default: true }
+    quantity: { type: Number, default: 1 }
 });
 
 const issueSchema = new mongoose.Schema({
@@ -88,7 +88,7 @@ app.get('/profile/:userId', async (req, res) => {
 // BOOKS
 app.post('/addBook', async (req, res) => {
     try {
-        const book = new Book({ ...req.body, available: true });
+        const book = new Book({ ...req.body, quantity: Number(req.body.quantity) || 1 });
         await book.save();
         res.json({ message: 'Book Added' });
     } catch (err) {
@@ -129,14 +129,19 @@ app.post('/issue', async (req, res) => {
         const { userId, bookId } = req.body;
         if (!userId || !bookId) return res.status(400).json({ error: "Missing userId or bookId" });
 
+        const activeIssuesCount = await Issue.countDocuments({ userId, returnDate: null });
+        if (activeIssuesCount >= 3) {
+            return res.status(400).json({ error: "Limit reached: You can issue a maximum of 3 books. Please return a book first." });
+        }
+
         const book = await Book.findById(bookId);
         if (!book) return res.status(404).json({ error: "Book not found" });
-        if (!book.available) return res.status(400).json({ error: "Not Available" });
+        if (book.quantity <= 0) return res.status(400).json({ error: "Out of Stock" });
 
         const issue = new Issue({ userId, bookId, issueDate: new Date(), fine: 0 });
         await issue.save();
 
-        book.available = false;
+        book.quantity -= 1;
         await book.save();
 
         res.json({ message: 'Issued successfully' });
@@ -163,7 +168,7 @@ app.post('/return', async (req, res) => {
 
         const book = await Book.findById(bookId);
         if (book) {
-            book.available = true;
+            book.quantity += 1;
             await book.save();
         }
 

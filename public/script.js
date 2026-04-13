@@ -78,7 +78,7 @@ async function login() {
     const data = await res.json();
     
     if (res.ok) {
-      currentUser = { userId: data._id, name: data.name, role: data.role };
+      currentUser = { userId: data._id, name: data.name, email: data.email, role: data.role };
       localStorage.setItem('libraryUser', JSON.stringify(currentUser));
       updateNav();
       navigate('books-view');
@@ -139,12 +139,12 @@ async function loadBooks(query = '') {
     books.forEach(b => {
       const card = document.createElement('div');
       card.className = 'book-card';
-      const isAvail = b.available !== false; // handle nullish/true
+      const isAvail = b.quantity > 0;
       card.innerHTML = `
         <h4 class="book-title">${b.title}</h4>
         <p class="book-author">by ${b.author}</p>
         <p class="book-status ${isAvail ? 'status-available' : 'status-unavailable'}">
-          ${isAvail ? 'Available' : 'Issued'}
+          ${isAvail ? b.quantity + ' Available' : 'Out of Stock'}
         </p>
         <button class="primary-btn" ${!isAvail ? 'disabled' : ''} style="${!isAvail ? 'opacity: 0.5; cursor: not-allowed;' : ''}" onclick="issueBook('${b._id}')">
           ${isAvail ? 'Issue Book' : 'Not Available'}
@@ -191,6 +191,10 @@ async function issueBook(bookId) {
 // Profile Logic
 async function loadProfile() {
   if (!currentUser) return;
+  
+  document.getElementById('profile-name').innerText = currentUser.name || 'N/A';
+  document.getElementById('profile-email').innerText = currentUser.email || 'Please re-login to sync';
+  document.getElementById('profile-role').innerText = currentUser.role || 'N/A';
   
   try {
     const [profileRes, booksRes] = await Promise.all([
@@ -272,14 +276,15 @@ async function loadAdminBooks() {
 async function addBook() {
   const title = document.getElementById('add-title').value;
   const author = document.getElementById('add-author').value;
+  const quantity = document.getElementById('add-quantity').value;
   
-  if (!title || !author) return showToast('Please fill all fields', 'error');
+  if (!title || !author || !quantity) return showToast('Please fill all fields', 'error');
   
   try {
     const res = await fetch(API + '/addBook', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, author })
+      body: JSON.stringify({ title, author, quantity: parseInt(quantity) })
     });
     const data = await res.json();
     
@@ -287,6 +292,7 @@ async function addBook() {
       showToast('Book added successfully');
       document.getElementById('add-title').value = '';
       document.getElementById('add-author').value = '';
+      document.getElementById('add-quantity').value = '1';
       loadAdminBooks();
     } else {
       showToast(data.error || 'Failed to add', 'error');
