@@ -141,10 +141,13 @@ async function loadBooks(query = '') {
       card.className = 'book-card';
       const isAvail = b.quantity > 0;
       card.innerHTML = `
+        <div class="book-cover-placeholder" style="background:var(--primary); height: 120px; border-radius: 4px; display:flex; align-items:center; justify-content:center; color: var(--secondary); margin-bottom: 1rem; box-shadow: inset 5px 0 10px rgba(0,0,0,0.2);">
+           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        </div>
         <h4 class="book-title">${b.title}</h4>
         <p class="book-author">by ${b.author}</p>
         <p class="book-status ${isAvail ? 'status-available' : 'status-unavailable'}">
-          ${isAvail ? b.quantity + ' Available' : 'Out of Stock'}
+          ${isAvail ? b.quantity + ' Available' : '<span style="border: 2px solid var(--danger); padding: 2px 6px; border-radius: 4px; transform: rotate(-5deg); display: inline-block;">ISSUED OUT</span>'}
         </p>
         <button class="primary-btn" ${!isAvail ? 'disabled' : ''} style="${!isAvail ? 'opacity: 0.5; cursor: not-allowed;' : ''}" onclick="issueBook('${b._id}')">
           ${isAvail ? 'Issue Book' : 'Not Available'}
